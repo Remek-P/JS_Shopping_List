@@ -19,6 +19,16 @@ const createButton = (classes) => {
 }
 
 const addItemToLocalStorage = (item) => {
+  const itemsFromStorage = getItemsFromLocalStorage(item);
+
+  // Add new item
+  itemsFromStorage.push(item);
+
+  // stringify and set to local storage
+  localStorage.setItem("items", JSON.stringify(itemsFromStorage));
+};
+
+const getItemsFromLocalStorage = () => {
   let itemsFromStorage;
 
   if (localStorage.getItem("items") === null) {
@@ -27,11 +37,15 @@ const addItemToLocalStorage = (item) => {
     itemsFromStorage = JSON.parse(localStorage.getItem("items"));
   }
 
-  // Add new item
-  itemsFromStorage.push(item);
+  return itemsFromStorage;
+};
 
-  // stringify and set to local storage
-  localStorage.setItem("items", JSON.stringify(itemsFromStorage));
+const displayItems = (item) => {
+  const itemsFromStorage = getItemsFromLocalStorage(item);
+
+  itemsFromStorage.forEach(item => addItemToDOM(item));
+
+  displayFilterAndClearButton();
 };
 
 const addItemToDOM = (item) => {
@@ -64,7 +78,7 @@ const onAddItemSubmit = (e) => {
 
   addItemToLocalStorage(newItem);
 
-  changeUIWhenNoLi();
+  displayFilterAndClearButton();
 
   itemInput.value = "";
 }
@@ -74,7 +88,8 @@ const removeItem = (e) => {
     if (confirm("Are you sure?"))
     e.target.parentElement.parentElement.remove();
 
-    changeUIWhenNoLi();
+    displayFilterAndClearButton();
+    displayClearAllButton();
   }
 }
 
@@ -82,10 +97,10 @@ const clearAllItems = () => {
   while (itemList.firstChild) {
     itemList.removeChild(itemList.firstChild)
   }
-  changeUIWhenNoLi();
+  displayFilterAndClearButton();
 }
 
-const changeUIWhenNoLi = () => {
+const displayFilterAndClearButton = () => {
   const items = itemList.querySelectorAll("li");
 
   if (items.length === 0) {
@@ -94,6 +109,15 @@ const changeUIWhenNoLi = () => {
   } else {
     buttonClear.style.display = "block";
     itemFilter.style.display = "block";
+  }
+};
+
+const displayClearAllButton = () => {
+
+  if (itemFilter.value) {
+    buttonClear.style.display = "none";
+  } else {
+    buttonClear.style.display = "block";
   }
 };
 
@@ -110,18 +134,18 @@ const filterItems = (e) => {
     } else {
       item.style.display = "none";
     }
-    // Show/hide clear all button
-    if (text) {
-      buttonClear.style.display = "none";
-    } else {
-      buttonClear.style.display = "block";
-    }
+
+    displayClearAllButton();
   })
 };
-
+const initialise = () => {
 itemForm.addEventListener("submit", onAddItemSubmit);
 itemList.addEventListener("click", removeItem);
 buttonClear.addEventListener("click", clearAllItems);
-itemFilter.addEventListener("input", filterItems)
+itemFilter.addEventListener("input", filterItems);
+document.addEventListener("DOMContentLoaded", displayItems)
 
-changeUIWhenNoLi();
+displayFilterAndClearButton();
+};
+
+initialise();
