@@ -18,7 +18,37 @@ const createButton = (classes) => {
   return button;
 }
 
-const addItem = (e) => {
+const addItemToLocalStorage = (item) => {
+  let itemsFromStorage;
+
+  if (localStorage.getItem("items") === null) {
+    itemsFromStorage = [];
+  } else {
+    itemsFromStorage = JSON.parse(localStorage.getItem("items"));
+  }
+
+  // Add new item
+  itemsFromStorage.push(item);
+
+  // stringify and set to local storage
+  localStorage.setItem("items", JSON.stringify(itemsFromStorage));
+};
+
+const addItemToDOM = (item) => {
+  //  Create new list item
+  const li = document.createElement("li");
+  const itemName = document.createTextNode(item);
+  li.appendChild(itemName);
+
+  //  Create delete button inside a list item
+  const button = createButton("remove-item btn-link text-red")
+  li.appendChild(button)
+
+  // Adding li
+  itemList.appendChild(li);
+};
+
+const onAddItemSubmit = (e) => {
   e.preventDefault();
 
 //  Validation
@@ -30,17 +60,9 @@ const addItem = (e) => {
     return;
   }
 
-//  Create new list item
-  const li = document.createElement("li");
-  const itemName = document.createTextNode(newItem);
-  li.appendChild(itemName);
+  addItemToDOM(newItem);
 
-  //  Create delete button inside a list item
-  const button = createButton("remove-item btn-link text-red")
-  li.appendChild(button)
-
-  // Adding li
-  itemList.appendChild(li);
+  addItemToLocalStorage(newItem);
 
   changeUIWhenNoLi();
 
@@ -97,7 +119,7 @@ const filterItems = (e) => {
   })
 };
 
-itemForm.addEventListener("submit", addItem);
+itemForm.addEventListener("submit", onAddItemSubmit);
 itemList.addEventListener("click", removeItem);
 buttonClear.addEventListener("click", clearAllItems);
 itemFilter.addEventListener("input", filterItems)
