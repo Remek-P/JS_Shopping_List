@@ -177,6 +177,7 @@ const displayFilterAndClearButton = () => {
   formButton.classList.remove("edit-mode");
   formButton.classList.add("btn");
 
+  displayClearAllButton();
 };
 
 const displayClearAllButton = () => {
