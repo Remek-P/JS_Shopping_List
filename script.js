@@ -3,6 +3,8 @@ const itemInput   = document.getElementById("item-input");
 const itemList    = document.getElementById("item-list");
 const buttonClear = document.getElementById("clear");
 const itemFilter  = document.getElementById("filter");
+const formButton  = itemForm.querySelector("button");
+let   isEditMode  = false;
 
 const createIcon = (classes) => {
   const icon = document.createElement("i");
@@ -74,6 +76,21 @@ const onAddItemSubmit = (e) => {
     return;
   }
 
+  // check if editing
+  if (isEditMode) {
+    const itemToEdit = itemList.querySelector(".edit-mode");
+    removeItemFromLocalStorage(itemToEdit.textContent);
+    itemToEdit.classList.remove("edit-mode");
+    itemToEdit.remove();
+    isEditMode = false;
+    itemFilter.removeAttribute("disabled");
+  } else {
+    if (checkForDuplicates(newItem)) {
+      alert("That item already exists");
+      return;
+    }
+  }
+
   addItemToDOM(newItem);
 
   addItemToLocalStorage(newItem);
@@ -83,24 +100,69 @@ const onAddItemSubmit = (e) => {
   itemInput.value = "";
 }
 
-const removeItem = (e) => {
-  if (e.target.parentElement.classList.contains("remove-item")) {
-    if (confirm("Are you sure?"))
-    e.target.parentElement.parentElement.remove();
+const removeItem = (item) => {
+  if (confirm("Are you sure?")) {
+    // Remove from DOM
+    item.remove();
+
+    // Remove from local storage
+    removeItemFromLocalStorage(item.textContent)
 
     displayFilterAndClearButton();
     displayClearAllButton();
   }
 }
 
+const removeItemFromLocalStorage = (item) => {
+  let itemsFromStorage = getItemsFromLocalStorage();
+
+  itemsFromStorage = itemsFromStorage.filter(i => i !== item);
+
+  localStorage.setItem("items", JSON.stringify(itemsFromStorage))
+};
+
+const onClickItem = (e) => {
+  if (e.target.parentElement.classList.contains("remove-item")) {
+    removeItem(e.target.parentElement.parentElement)
+  } else {
+    setItemToEdit(e.target);
+  }
+};
+
+const checkForDuplicates = (item) => {
+  const itemsFromStorage = getItemsFromLocalStorage();
+
+  return itemsFromStorage.includes(item);
+};
+
+const setItemToEdit = (item) => {
+  isEditMode = true;
+  itemFilter.setAttribute("disabled", "disabled");
+
+  itemList
+      .querySelectorAll("li")
+      .forEach(i => i.classList.remove("edit-mode"));
+  item.classList.add("edit-mode");
+  formButton.innerHTML = "<i class='fa-solid fa-pen'></i> Update Item";
+  formButton.classList.add("edit-mode")
+  itemInput.value = item.textContent;
+  displayClearAllButton();
+};
+
 const clearAllItems = () => {
   while (itemList.firstChild) {
     itemList.removeChild(itemList.firstChild)
   }
+
+  // clear from local storage
+  localStorage.removeItem("items")
+
   displayFilterAndClearButton();
 }
 
 const displayFilterAndClearButton = () => {
+  itemInput.value = "";
+
   const items = itemList.querySelectorAll("li");
 
   if (items.length === 0) {
@@ -110,6 +172,11 @@ const displayFilterAndClearButton = () => {
     buttonClear.style.display = "block";
     itemFilter.style.display = "block";
   }
+
+  formButton.innerHTML = "<i class=\"fa-solid fa-plus\"></i> Add Item";
+  formButton.classList.remove("edit-mode");
+  formButton.classList.add("btn");
+
 };
 
 const displayClearAllButton = () => {
@@ -139,11 +206,12 @@ const filterItems = (e) => {
   })
 };
 const initialise = () => {
-itemForm.addEventListener("submit", onAddItemSubmit);
-itemList.addEventListener("click", removeItem);
-buttonClear.addEventListener("click", clearAllItems);
-itemFilter.addEventListener("input", filterItems);
-document.addEventListener("DOMContentLoaded", displayItems)
+  itemForm.addEventListener("submit", onAddItemSubmit);
+  itemList.addEventListener("click", onClickItem);
+  buttonClear.addEventListener("click", clearAllItems);
+  itemFilter.addEventListener("input", filterItems);
+  document.addEventListener("DOMContentLoaded", displayItems);
+  itemFilter.value = "";
 
 displayFilterAndClearButton();
 };

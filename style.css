@@ -118,6 +118,14 @@ header h1 {
   cursor: pointer;
 }
 
+/*Editing*/
+.edit-mode {
+  color: white;
+  background-color: lightgray;
+}
+
+
+
 @media (max-width: 500px) {
   .items li {
     width: 100%;
