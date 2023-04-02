@@ -9,16 +9,4 @@ This is a simple Shopping List app made in Vanilla JavaScript, based on one of t
 * Filter Items,
 * Tasks are stored and retrieved from local storage.
 
-## Comands
-
-Start the app
-````
-npm start
-````
-
-Start the pseudo-server
-```` 
-npm run server
-````
-
 ## Try it out: https://iridescent-centaur-cb728f.netlify.app/
