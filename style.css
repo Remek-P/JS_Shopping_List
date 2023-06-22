@@ -124,8 +124,6 @@ header h1 {
   background-color: lightgray;
 }
 
-
-
 @media (max-width: 500px) {
   .items li {
     width: 100%;
